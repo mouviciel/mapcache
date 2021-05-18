@@ -14,4 +14,4 @@ apt-get -y upgrade
 apt-get install -q -y build-essential pkg-config cmake libgeos-dev rake vim \
     bison flex libgdal1-dev libproj-dev libpng12-dev libjpeg-dev libfcgi-dev \
     libcurl4-gnutls-dev apache2-prefork-dev libtiff4-dev libpixman-1-dev \
-    libsqlite3-dev libmemcached-dev
+    libsqlite3-dev libmemcached-dev apache2 gdal-bin libxml2-utils
