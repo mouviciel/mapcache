@@ -1,16 +1,14 @@
 #!/bin/sh
 
-NUMTHREADS=2 # we have 2 cpus configured
-export NUMTHREADS
-
-echo /etc/local/lib > /etc/ld.so.conf.d/local.conf
-
 cd /vagrant
 
-mkdir build_vagrant
-cd build_vagrant
-cmake -DWITH_MEMCACHE=1 ..
-
-make -j $NUMTHREADS
-make install
-ldconfig
+# env from .travis.yml
+DISTRO="xenial"
+BUILD_TYPE="maximum"
+# script from .travis.yml
+mkdir build
+cd build
+if test "$BUILD_TYPE" = "maximum"; then cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DWITH_TIFF=ON -DWITH_GEOTIFF=ON -DWITH_TIFF_WRITE_SUPPORT=ON -DWITH_PCRE=ON -DWITH_SQLITE=ON -DWITH_BERKELEY_DB=ON; else cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DWITH_TIFF=OFF -DWITH_GEOTIFF=OFF -DWITH_TIFF_WRITE_SUPPORT=OFF -DWITH_PCRE=OFF -DWITH_SQLITE=OFF -DWITH_BERKELEY_DB=OFF -DWITH_GDAL=OFF -DWITH_GEOS=OFF -DWITH_FCGI=OFF -DWITH_CGI=OFF -DWITH_APACHE=OFF -DWITH_OGR=OFF -DWITH_MAPSERVER=OFF -DWITH_MAPCACHE_DETAIL=OFF; fi
+make -j3
+sudo make install
+if test "$DISTRO" = "xenial" -a "$BUILD_TYPE" = "maximum"; then cd ../tests; sh ./travis_setup.sh; sh ./run_tests.sh; fi
