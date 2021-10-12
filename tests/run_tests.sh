@@ -28,12 +28,20 @@
 
 set -e
 
+if [ -n "$1" ]
+then
+  CHECKSUM=$1
+else
+  # Default with 'xenial' box
+  CHECKSUM=20574
+fi
+
 MAPCACHE_CONF=/tmp/mc/mapcache.xml
 
 # Check MapCache without involving HTTP server: build local cache from remote source
 sudo rm -rf /tmp/mc/global
 mapcache_seed -c /tmp/mc/mapcache.xml -t global --force -z 0,1
-gdalinfo -checksum /tmp/mc/global/GoogleMapsCompatible/00/000/000/000/000/000/000.jpg | grep Checksum=20574 >/dev/null || (echo "Did not get expected checksum"; gdalinfo -checksum /tmp/mc/global/GoogleMapsCompatible/00/000/000/000/000/000/000.jpg; /bin/false)
+gdalinfo -checksum /tmp/mc/global/GoogleMapsCompatible/00/000/000/000/000/000/000.jpg | grep Checksum=$CHECKSUM >/dev/null || (echo "Did not get expected checksum"; gdalinfo -checksum /tmp/mc/global/GoogleMapsCompatible/00/000/000/000/000/000/000.jpg; /bin/false)
 sudo rm -rf /tmp/mc/global
 
 # Check basic MapCache HTTP features: WMS GetCapabilities request
@@ -46,7 +54,7 @@ diff -u /tmp/wmts_capabilities.xml expected
 
 # Check full MapCache functionality: request tile that needs to be fetched from source
 curl -s "http://localhost/mapcache/wmts/1.0.0/global/default/GoogleMapsCompatible/0/0/0.jpg" > /tmp/0.jpg
-gdalinfo -checksum /tmp/0.jpg | grep Checksum=20574 >/dev/null || (echo "Did not get expected checksum"; gdalinfo -checksum /tmp/0.jpg; /bin/false)
+gdalinfo -checksum /tmp/0.jpg | grep Checksum=$CHECKSUM >/dev/null || (echo "Did not get expected checksum"; gdalinfo -checksum /tmp/0.jpg; /bin/false)
 
 # Check full MapCache functionality: request tile that is already cached
 curl -s "http://localhost/mapcache/wmts/1.0.0/global/default/GoogleMapsCompatible/0/0/0.jpg" > /tmp/0_bis.jpg

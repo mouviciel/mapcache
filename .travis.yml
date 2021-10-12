@@ -2,12 +2,22 @@ matrix:
   fast_finish: true
   include:
     - os: linux
+      dist: bionic
+      language: c
+      sudo: required
+      env:
+        - DISTRO=bionic
+        - BUILD_TYPE=maximum
+        - CHECKSUM=20250
+
+    - os: linux
       dist: xenial
       language: c
       sudo: required
       env:
         - DISTRO=xenial
         - BUILD_TYPE=maximum
+        - CHECKSUM=20574
 
     - os: linux
       dist: xenial
@@ -31,9 +41,9 @@ before_install:
   - sudo apt-get purge -y libgdal* libgeos* libspatialite*
   - sudo add-apt-repository -y ppa:ubuntugis/ubuntugis-unstable
   - sudo apt-get update
-  - sudo apt-get install cmake libspatialite-dev libfcgi-dev libproj-dev libgeos-dev libgdal-dev libtiff-dev libgeotiff-dev apache2-dev libpcre3-dev libsqlite3-dev libdb-dev
+  - sudo apt-get install -y cmake libspatialite-dev libfcgi-dev libproj-dev libgeos-dev libgdal-dev libtiff-dev libgeotiff-dev apache2-dev libpcre3-dev libsqlite3-dev libdb-dev libpixman-1-dev
 # For testing
-  - sudo apt-get install libxml2-utils apache2 gdal-bin
+  - sudo apt-get install -y libxml2-utils apache2 gdal-bin
 
 script:
   - mkdir build
@@ -42,7 +52,7 @@ script:
   - make -j3
   - sudo make install
 # Only test with Apache 2.4
-  - if test "$DISTRO" = "xenial" -a "$BUILD_TYPE" = "maximum"; then cd ../tests; sh ./travis_setup.sh; sh ./run_tests.sh; fi
+  - if test -n "$CHECKSUM"; then cd ../tests; sh ./travis_setup.sh; sh ./run_tests.sh "$CHECKSUM"; fi
 
 
 #notifications:
